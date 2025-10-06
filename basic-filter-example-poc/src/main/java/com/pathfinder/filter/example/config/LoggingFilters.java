@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -31,8 +32,6 @@ public class LoggingFilters implements Filter{
             httpServletResponse = (HttpServletResponse) servletResponse;
         }
 
-        /*logger.info("Logging Filter: Request Method : {} , Request URL : {}",
-                    httpServletRequest.getMethod(),httpServletRequest.getRequestURL().toString());*/
         final String method = httpServletRequest.getMethod();
         final String servletPath = httpServletRequest.getServletPath();
         final String requestURI = httpServletRequest.getRequestURL().toString();
@@ -40,8 +39,19 @@ public class LoggingFilters implements Filter{
         logger.info("Logging Filter: Request Method : {} , Request URL : {} , servletPath : {} , requestURI : {}",
                 method,requestURI,servletPath,requestURI1);
 
+        MDC.put("requestId",String.valueOf(System.currentTimeMillis()));
+        MDC.put("requestMethod",method);
+        MDC.put("requestURI",requestURI);
+        MDC.put("servletPath",servletPath);
+
         filterChain.doFilter(servletRequest,servletResponse);
         logger.info("Response received at : {} " , System.currentTimeMillis());
+
+        MDC.remove("requestId");
+        MDC.remove("requestMethod");
+        MDC.remove("requestURI");
+        MDC.remove("servletPath");
+
 
     }
 
